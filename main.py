@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Pinecone
+# from langchain.vectorstores import Pinecone
+from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.llms import OpenAI
 from langchain.chains import RetrievalQA
 import pinecone
@@ -21,16 +22,19 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 texts = text_splitter.split_documents(documents)
 
-pinecone.init(
-    api_key=os.environ.get("PINECONE_API_KEY"),
-    environment=os.environ.get("PINECONE_API_ENVIRONMENT"),
-)
+# pinecone.init(
+#     api_key=os.environ.get("PINECONE_API_KEY"),
+#     environment=os.environ.get("PINECONE_API_ENVIRONMENT"),
+# )
 
 embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
-vector_store = Pinecone.from_documents(
-    texts, embeddings, index_name="chat-with-text-file"
-)
+# vector_store = Pinecone.from_documents(
+#     texts, embeddings, index_name="chat-with-text-file"
+# )
+
+vector_store = DocArrayInMemorySearch.from_documents(texts, embeddings)
+
 
 qa = RetrievalQA.from_chain_type(
     llm=OpenAI(), chain_type="stuff", retriever=vector_store.as_retriever(), return_source_documents=True
